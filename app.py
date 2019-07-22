@@ -92,7 +92,7 @@ def post_api():
         reply = {
             'detection_result': detection_result
         }
-        print(obj_json)
+        print(detection_result)
         return jsonify(reply)
     else:
         return "You need to use post method"
