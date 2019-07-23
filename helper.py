@@ -45,5 +45,5 @@ def object_translate(obj_english):
     response = request.json()
     ret = ''
     for translation_dict in response[0]['translations']:
-        ret = translation_dict['text']
+        ret = translation_dict['text'].replace(" ","")
     return ret
