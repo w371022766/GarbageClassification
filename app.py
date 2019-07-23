@@ -68,7 +68,7 @@ def object_closest(object_chinese):
             cnt += 1
     #print('{0} times cannot calculate similarity'.format(cnt))
     print('best word: {0}, similarity: {1}'.format(word_closest, bestres))
-    if bestres > 0.4:
+    if bestres > 0.5:
         return word_closest
     else:
         return ''
@@ -112,6 +112,10 @@ def post_api():
         t.join()
         reply_custom = t.get_result()
         if(len(reply_custom['objects'])>0):
+            for obj in reply_custom['objects']:
+                obj_closest = object_closest(obj['object'])
+                obj['object_closest'] = obj_closest
+                obj['classification'] = garbagedict[obj_closest]
             detection_result = reply_custom
         else:
             detection_result = reply_detect

@@ -63,7 +63,7 @@ def object_detection_custom_vision(file_path):
     request = requests.post(custom_vision_url, headers=headers, data=image_bin)
     response_json = request.json()
     response_json['objects'] = []
-    print(response_json)
+    # print(response_json)
     for obj in response_json['predictions']:
         if obj['probability'] < 0.9: continue
         obj_json = dict()
