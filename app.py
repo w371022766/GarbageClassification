@@ -1,6 +1,6 @@
 # coding=utf-8
 from flask import Flask, request, jsonify
-from helper import object_detection,object_translate
+from helper import *
 import flask_cors
 import base64
 import time
@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import os
 from gensim.models.keyedvectors import KeyedVectors
+import threading
 
 app = Flask(__name__)
 flask_cors.CORS(app, supports_credentials=True)
@@ -72,6 +73,22 @@ def object_closest(object_chinese):
     else:
         return ''
 
+def detect_process(file_path):
+    with open(file_path, 'rb') as f:
+        image_bin = f.read()
+        detection_result = object_detection(image_bin)
+    for obj_json in detection_result['objects']:
+        obj_english = obj_json['object']
+        obj_json['object_english'] = obj_english
+        obj_chinese = object_translate(obj_english)
+        obj_closest = object_closest(obj_chinese)
+        obj_json['object'] = obj_chinese
+        obj_json['object_closest'] = obj_closest
+        if obj_closest and (not obj_closest.isspace()):
+            obj_json['classification'] = garbagedict[obj_closest]
+        else:
+            obj_json['classification'] = ''
+    return detection_result
 
 @app.route('/post/api', methods=['GET','POST'])
 def post_api():
@@ -89,25 +106,19 @@ def post_api():
         file_path = os.path.join(image_dir, '{}.jpg'.format(file_name_by_time))
         #file_path = os.path.join(image_dir, 'temp.jpg')
         cv2.imwrite(file_path, image)
-
-        with open(file_path, 'rb') as f:
-            image_bin = f.read()
-            detection_result = object_detection(image_bin)
-        for obj_json in detection_result['objects']:
-            obj_english = obj_json['object']
-            obj_json['object_english'] = obj_english
-            obj_chinese = object_translate(obj_english)
-            obj_closest = object_closest(obj_chinese)
-            obj_json['object'] = obj_chinese
-            obj_json['object_closest'] = obj_closest
-            if obj_closest and (not obj_closest.isspace()):
-                obj_json['classification'] = garbagedict[obj_closest]
-            else:
-                obj_json['classification'] = ''
+        t = MyThread(object_detection_custom_vision, args=(file_path,))
+        t.start()
+        reply_detect = detect_process(file_path)
+        t.join()
+        reply_custom = t.get_result()
+        if(len(reply_custom['objects'])>0):
+            detection_result = reply_custom
+        else:
+            detection_result = reply_detect
+        print(detection_result)
         reply = {
             'detection_result': detection_result
         }
-        print(detection_result)
         if os.path.exists(file_path):
             os.remove(file_path)
         else:
