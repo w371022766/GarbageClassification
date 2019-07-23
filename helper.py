@@ -3,6 +3,7 @@ import requests
 import uuid
 import configparser
 import threading
+import cv2
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -51,6 +52,9 @@ def object_translate(obj_english):
 
 
 def object_detection_custom_vision(file_path):
+    image = cv2.imread(file_path) #import cv2
+    image_height = image.shape[0]
+    image_width = image.shape[1]
     with open(file_path, 'rb') as f:
         image_bin = f.read()
     iteration_name = 'Iteration3'
@@ -70,10 +74,10 @@ def object_detection_custom_vision(file_path):
         obj_json['object'] = obj['tagName']
         obj_json['confidence'] = obj['probability']
         obj_json['rectangle'] = dict()
-        obj_json['rectangle']['x'] = obj['boundingBox']['left']
-        obj_json['rectangle']['y'] = obj['boundingBox']['top']
-        obj_json['rectangle']['h'] = obj['boundingBox']['height']
-        obj_json['rectangle']['w'] = obj['boundingBox']['width']
+        obj_json['rectangle']['x'] = int(obj['boundingBox']['left'] * image_width)
+        obj_json['rectangle']['y'] = int(obj['boundingBox']['top'] * image_height)
+        obj_json['rectangle']['h'] = int(obj['boundingBox']['height'] * image_height)
+        obj_json['rectangle']['w'] = int(obj['boundingBox']['width'] * image_width)
         response_json['objects'].append(obj_json)
     response_json['predictions'] = ''
     return response_json
