@@ -16,7 +16,7 @@ flask_cors.CORS(app, supports_credentials=True)
 root_dir = os.path.abspath(os.path.dirname(__file__))
 image_dir = os.path.join(root_dir, 'static/image/')
 
-recoverableItems = ['厨房电器', '电子产品', '家电', '报纸', '纸箱', '书本', '纸袋', '信封', '塑料瓶', '玩具', '油桶', '乳液罐', '食品保鲜盒', '衣架', '泡沫塑料', '酒瓶', '玻璃杯', '玻璃放大镜', '窗玻璃', '碎玻璃', '易拉罐', '锅', '螺丝刀', '刀', '刀片', '指甲钳', '皮鞋', '衣服', '床单', '枕头', '包', '毛绒玩具', '电路板', '电线', '插座', '积木', '砧板']
+recoverableItems = ['计算机键盘', '厨房电器', '电子产品', '家电', '报纸', '纸箱', '书本', '纸袋', '信封', '塑料瓶', '玩具', '油桶', '乳液罐', '食品保鲜盒', '衣架', '泡沫塑料', '酒瓶', '玻璃杯', '玻璃放大镜', '窗玻璃', '碎玻璃', '易拉罐', '锅', '螺丝刀', '刀', '刀片', '指甲钳', '皮鞋', '衣服', '床单', '枕头', '包', '毛绒玩具', '电路板', '电线', '插座', '积木', '砧板']
 hazardousItems = ['充电电池', '蓄电池', '纽扣电池', '碱性电池', '铂酸电池', '荧光灯', '节能灯', '卤素灯', '过期药物', '药品包装', '药片', '过期胶囊药品', '废油漆桶', '染发剂壳', '过期指甲油', '洗甲水', '水银血压计', '水银体温计', '消毒剂', '老鼠药', '杀虫喷雾', 'X光片', '感光胶片', '胶片底片']
 householdItems = ['剩饭剩菜', '蛋糕饼干', '面包', '动物内脏', '苹果核', '鸡肉', '鱼', '虾', '鸡蛋', '蛋壳', '干果仁', '蔬菜', '大米', '花卉', '宠物饲料', '中药药渣', '水果']
 residualItems = ['餐巾纸', '烟蒂', '卫生间用纸', '陶瓷花盆', '胶带', '橡皮泥', '创可贴', '笔', '灰尘', '眼镜', '头发', '内衣裤', '防碎气泡罐', '污损纸张', '旧毛巾', '敲碎陶瓷碗', '无损塑料袋']
@@ -59,7 +59,10 @@ def object_closest(object_chinese):
     cnt = 0
     for (key, value) in garbagedict.items():
         try:
-            similarity = model.similarity(object_chinese, key)
+            if object_chinese == key:
+                similarity = 1
+            else:
+                similarity = model.similarity(object_chinese, key)
             if similarity > bestres:
                 bestres = similarity
                 word_closest = key
